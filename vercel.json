@@ -2,9 +2,12 @@
   "version": 2,
   "name": "kdt-calendar",
   "builds": [
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "m/index.html", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/m", "dest": "/m/index.html" },
+    { "src": "/m/(.*)", "dest": "/m/index.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
