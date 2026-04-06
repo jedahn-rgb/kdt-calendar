@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-DeepTech Town — 공간 예약</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F8FA;--bg2:#fff;--bg3:#EFF1F5;--s2:#F2F4F8;
+  --bdr:rgba(0,0,0,.07);--bdr2:rgba(0,0,0,.13);
+  --acc:#2B60F8;--acc-d:rgba(43,96,248,.08);--acc-g:rgba(43,96,248,.12);
+  --gold:#B87D2E;--gold-bg:#FBF3E4;--gold-bd:rgba(184,125,46,.22);
+  --txt:#0F1117;--txt2:#4A5068;--txt3:#9298AE;
+  --grn:#1A9E64;--grn-bg:#EBF8F2;--grn-bd:rgba(26,158,100,.2);
+  --red:#D63B3B;--red-bg:#FEF0F0;--red-bd:rgba(214,59,59,.2);
+  --amb:#C47B00;--amb-bg:#FFF8EC;--amb-bd:rgba(196,123,0,.2);
+  --r:14px;--rsm:8px;
+  --sh0:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.05);
+  --sh1:0 4px 24px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
+  --sh2:0 12px 48px rgba(0,0,0,.13),0 2px 8px rgba(0,0,0,.05);
+  --tr:.2s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+.hdr{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;background:rgba(255,255,255,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--acc),#6B45E8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(43,96,248,.28);}
+.logo-name{font-family:'Noto Sans KR',sans-serif;font-size:15px;color:var(--txt);}
+.logo-sub{font-size:9px;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;font-weight:500;}
+.hdr-r{display:flex;align-items:center;gap:10px;}
+.cr-badge{display:flex;align-items:center;gap:6px;background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:100px;padding:4px 12px 4px 8px;}
+.cr-badge .ico{width:18px;height:18px;background:linear-gradient(135deg,#E8B86D,#C47B00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;}
+.cr-amt{font-size:12px;font-weight:700;color:var(--gold);}
+.cr-lbl{font-size:10px;color:var(--txt3);}
+.av{width:30px;height:30px;background:linear-gradient(135deg,var(--acc),#6B45E8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer;}
+.main{display:grid;grid-template-columns:240px 1fr 332px;height:calc(100vh - 58px);}
+.left{border-right:1px solid var(--bdr);padding:18px 14px;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:22px;}
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;padding-left:2px;}
+.mcal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:13px;box-shadow:var(--sh0);}
+.mcal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mcal-mo{font-size:12px;font-weight:700;color:var(--txt);}
+.mcal-nav{display:flex;gap:3px;}
+.mcal-nav button{width:22px;height:22px;background:none;border:1px solid var(--bdr);border-radius:5px;color:var(--txt2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);}
+.mcal-nav button:hover{background:var(--s2);}
+.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.mcal-dlbl{font-size:9px;color:var(--txt3);text-align:center;padding:2px 0;font-weight:600;}
+.mcal-d{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--txt2);border-radius:6px;cursor:pointer;transition:all var(--tr);position:relative;}
+.mcal-d:hover{background:var(--s2);color:var(--txt);}
+.mcal-d.today{color:var(--acc);font-weight:700;}
+.mcal-d.sel{background:var(--acc);color:#fff!important;font-weight:700;box-shadow:0 2px 6px rgba(43,96,248,.3);}
+.mcal-d.dot::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;background:var(--grn);border-radius:50%;}
+.mcal-d.other{color:var(--txt3);}
+.rec-list{display:flex;flex-direction:column;}
+.rec-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);cursor:pointer;transition:opacity var(--tr);}
+.rec-item:hover{opacity:.7;}
+.rec-item:last-child{border-bottom:none;}
+.rec-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.rec-info{flex:1;min-width:0;}
+.rec-name{font-size:11px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rec-meta{font-size:9px;color:var(--txt3);margin-top:1px;}
+.rec-cr{font-size:10px;font-weight:700;color:var(--gold);white-space:nowrap;}
+.cal{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;border-bottom:1px solid var(--bdr);background:var(--bg2);flex-shrink:0;}
+.cal-title{font-family:'Noto Sans KR',sans-serif;font-size:19px;color:var(--txt);}
+.cal-ctrl{display:flex;align-items:center;gap:7px;}
+.vtog{display:flex;background:var(--bg3);border-radius:var(--rsm);padding:3px;border:1px solid var(--bdr);}
+.vbtn{padding:3px 10px;border-radius:5px;font-size:11px;font-weight:500;color:var(--txt3);cursor:pointer;transition:all var(--tr);border:none;background:none;font-family:inherit;}
+.vbtn.act{background:#fff;color:var(--txt);box-shadow:var(--sh0);font-weight:600;}
+.nav-wk{display:flex;align-items:center;gap:4px;}
+.nbtn{width:28px;height:28px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rsm);color:var(--txt2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);box-shadow:var(--sh0);}
+.nbtn:hover{background:var(--s2);}
+.tbtn{padding:4px 10px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rsm);font-size:11px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all var(--tr);font-family:inherit;box-shadow:var(--sh0);}
+.tbtn:hover{background:var(--s2);}
+.wkview{display:flex;flex:1;overflow:hidden;}
+.tcol{width:50px;flex-shrink:0;border-right:1px solid var(--bdr);overflow:hidden;padding-top:42px;background:var(--bg2);}
+.tslot{height:72px;display:flex;align-items:flex-start;padding:5px 7px 0;font-size:9px;color:var(--txt3);letter-spacing:.04em;font-weight:600;}
+.dcols{display:flex;flex:1;overflow:hidden;}
+.dcol{flex:1;border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;}
+.dcol:last-child{border-right:none;}
+.dhdr{height:42px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid var(--bdr);background:var(--bg2);cursor:pointer;transition:background var(--tr);}
+.dhdr:hover{background:var(--s2);}
+.dhdr.today{background:var(--acc-d);}
+.dname{font-size:9px;font-weight:700;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;}
+.dnum{font-size:15px;font-weight:600;color:var(--txt2);line-height:1.2;}
+.dhdr.today .dnum,.dhdr.today .dname{color:var(--acc);}
+.dslots{flex:1;overflow-y:auto;position:relative;background:var(--bg2);scrollbar-width:thin;scrollbar-color:var(--bdr) transparent;}
+.hrow{height:72px;border-bottom:1px solid var(--bdr);position:relative;}
+.hrow:hover{background:rgba(43,96,248,.02);}
+.hline{position:absolute;top:50%;left:0;right:0;border-top:1px dashed var(--bdr);}
+.ev{position:absolute;left:3px;right:3px;border-radius:6px;padding:4px 6px;cursor:pointer;overflow:hidden;transition:all var(--tr);border-left-width:3px;border-left-style:solid;border-top:1px solid;border-right:1px solid;border-bottom:1px solid;}
+.ev:hover{transform:translateX(1px);box-shadow:var(--sh0);}
+.ev.completed{background:var(--grn-bg);border-color:var(--grn-bd);border-left-color:var(--grn);}
+.ev.pending{background:#EEF3FF;border-color:rgba(43,96,248,.15);border-left-color:var(--acc);}
+.ev.cancelled{background:var(--red-bg);border-color:var(--red-bd);border-left-color:var(--red);opacity:.6;}
+.ev-nm{font-size:10px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;}
+.ev-sb{font-size:9px;color:var(--txt3);margin-top:1px;}
+.ev-cr{font-size:9px;color:var(--gold);font-weight:700;margin-top:1px;}
+.tnow{position:absolute;left:0;right:0;height:2px;background:var(--acc);z-index:10;pointer-events:none;}
+.tnow::before{content:'';position:absolute;left:-4px;top:-4px;width:9px;height:9px;background:var(--acc);border-radius:50%;box-shadow:0 0 0 3px rgba(43,96,248,.2);}
+.right{border-left:1px solid var(--bdr);display:flex;flex-direction:column;background:var(--bg2);overflow-y:auto;}
+.sp-sect{padding:14px 14px 0;}
+.sp-tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px;}
+.sp-tab{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;border:1.5px solid var(--bdr);background:var(--bg3);cursor:pointer;transition:all var(--tr);font-size:11px;font-weight:500;color:var(--txt2);}
+.sp-tab:hover{border-color:var(--bdr2);background:var(--s2);color:var(--txt);}
+.sp-tab.act{background:var(--acc-d);border-color:rgba(43,96,248,.3);color:var(--acc);font-weight:700;}
+.sp-tab .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sp-card{background:var(--bg2);border:1.5px solid var(--acc);border-radius:var(--r);padding:13px;box-shadow:0 0 0 3px var(--acc-g),var(--sh0);}
+.sp-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.sp-card-name{font-size:14px;font-weight:700;color:var(--txt);}
+.sp-card-loc{font-size:10px;color:var(--txt3);margin-top:2px;}
+.pill{font-size:9px;font-weight:700;padding:3px 8px;border-radius:100px;white-space:nowrap;}
+.pg{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd);}
+.pa{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd);}
+.pr{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.sp-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;}
+.mc{background:var(--bg3);border-radius:var(--rsm);padding:7px 8px;text-align:center;}
+.mc-val{font-size:13px;font-weight:800;color:var(--gold);letter-spacing:-.5px;}
+.mc-key{font-size:9px;color:var(--txt3);margin-top:2px;}
+.sp-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.stag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:100px;background:var(--bg3);color:var(--txt3);border:1px solid var(--bdr);}
+.atag{display:inline-flex;align-items:center;gap:2px;background:var(--amb-bg);border:1px solid var(--amb-bd);border-radius:100px;padding:2px 7px;font-size:9px;font-weight:600;color:var(--amb);}
+.avbar{height:3px;background:var(--bg3);border-radius:3px;margin-top:9px;overflow:hidden;}
+.avfill{height:100%;border-radius:3px;}
+.cr-block{margin:12px 14px 0;background:linear-gradient(135deg,#EEF3FF 0%,#F7F0FF 100%);border:1px solid rgba(43,96,248,.15);border-radius:var(--r);padding:13px;box-shadow:var(--sh0);}
+.cr-block-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cr-block-title{font-size:9px;font-weight:700;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.cr-refresh{font-size:9px;color:var(--acc);cursor:pointer;}
+.cr-row{display:flex;align-items:flex-end;gap:10px;margin-bottom:7px;}
+.cr-num{font-family:'Noto Sans KR',sans-serif;font-size:24px;color:var(--gold);letter-spacing:-.5px;line-height:1;}
+.cr-sub{font-size:10px;color:var(--txt3);padding-bottom:2px;}
+.cr-bar{height:3px;background:rgba(0,0,0,.07);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.cr-bar-fill{height:100%;width:62%;background:linear-gradient(90deg,#E8A330,#F5C060);border-radius:3px;}
+.cr-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.cstat{background:rgba(255,255,255,.75);border-radius:var(--rsm);padding:6px 8px;border:1px solid rgba(255,255,255,.9);}
+.cstat-val{font-size:11px;font-weight:700;color:var(--txt);}
+.cstat-key{font-size:9px;color:var(--txt3);margin-top:1px;}
+.bform{padding:12px 14px;border-top:1px solid var(--bdr);margin-top:12px;}
+.flbl{font-size:9px;font-weight:700;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:block;}
+.frow{margin-bottom:10px;}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.tsel{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--rsm);color:var(--txt);font-family:inherit;font-size:11px;font-weight:500;padding:7px 9px;cursor:pointer;appearance:none;outline:none;transition:border-color var(--tr);width:100%;box-shadow:var(--sh0);}
+.tsel:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-d);}
+.ninput{width:100%;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--rsm);color:var(--txt);font-family:inherit;font-size:11px;padding:7px 10px;outline:none;transition:all var(--tr);box-shadow:var(--sh0);}
+.ninput::placeholder{color:var(--txt3);}
+.ninput:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-d);}
+.cprev{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--rsm);padding:10px 12px;margin-bottom:10px;box-shadow:var(--sh0);}
+.cprow{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:4px;}
+.cprow:last-child{margin-bottom:0;}
+.cpl{color:var(--txt3);}
+.cpv{color:var(--txt);font-weight:600;}
+.cpv.hi{color:var(--gold);font-weight:800;}
+.cpv.gr{color:var(--grn);font-weight:700;}
+.cpv.rd{color:var(--red);font-weight:700;}
+.hdiv{border:none;border-top:1px solid var(--bdr);margin:4px 0;}
+.sbtn{width:100%;height:42px;background:linear-gradient(135deg,var(--acc),#5B3FE8);border:none;border-radius:var(--rsm);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all var(--tr);box-shadow:0 4px 12px rgba(43,96,248,.28);}
+.sbtn:hover{box-shadow:0 6px 18px rgba(43,96,248,.38);transform:translateY(-1px);}
+.sbtn:active{transform:translateY(0);}
+.sbtn:disabled{background:var(--bg3);color:var(--txt3);box-shadow:none;cursor:not-allowed;transform:none;}
+.moverlay{position:fixed;inset:0;background:rgba(15,17,23,.38);backdrop-filter:blur(5px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s;}
+.moverlay.open{opacity:1;pointer-events:all;}
+.modal{width:400px;max-width:92vw;background:var(--bg2);border:1px solid var(--bdr2);border-radius:18px;box-shadow:var(--sh2);transform:scale(.96) translateY(8px);transition:transform .22s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+.moverlay.open .modal{transform:scale(1) translateY(0);}
+.mhdr{padding:20px 20px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+.mtitle{font-family:'Noto Sans KR',sans-serif;font-size:19px;color:var(--txt);}
+.mclose{width:26px;height:26px;background:var(--s2);border:1px solid var(--bdr);border-radius:7px;cursor:pointer;color:var(--txt3);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);}
+.mclose:hover{background:var(--bg3);color:var(--txt);}
+.mbody{padding:16px 20px 20px;}
+.migrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.micard{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rsm);padding:9px 11px;}
+.milbl{font-size:9px;color:var(--txt3);margin-bottom:2px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.mival{font-size:13px;font-weight:700;color:var(--txt);}
+.mcrsum{background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:var(--rsm);padding:12px 13px;margin-bottom:14px;}
+.mcrow{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.mcrow:last-child{margin-bottom:0;}
+.mctotal{font-size:14px;font-weight:800;color:var(--gold);}
+.mactions{display:flex;gap:7px;}
+.mcnl{flex:1;height:40px;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:var(--rsm);color:var(--txt2);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all var(--tr);}
+.mcnl:hover{background:var(--s2);}
+.mcfm{flex:2;height:40px;background:linear-gradient(135deg,var(--acc),#5B3FE8);border:none;border-radius:var(--rsm);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all var(--tr);box-shadow:0 3px 8px rgba(43,96,248,.22);}
+.mcfm:hover{opacity:.92;}
+.anotice{background:var(--amb-bg);border:1px solid var(--amb-bd);border-radius:var(--rsm);padding:9px 11px;margin-bottom:12px;font-size:11px;color:var(--amb);line-height:1.5;}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--txt);border-radius:100px;padding:9px 18px;font-size:12px;font-weight:500;color:#fff;box-shadow:var(--sh2);opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.4,0,.2,1);z-index:300;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.legend{display:flex;align-items:center;gap:8px;}
+.lgd{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--txt3);}
+.lgd span{display:inline-block;width:9px;height:9px;border-radius:2px;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-mark">K</div>
+    <div>
+      <div class="logo-name">K-DeepTech Town</div>
+      <div class="logo-sub">Angel Association · Space Booking</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="av">양</div>
+  </div>
+</header>
+<div class="main">
+  <aside class="left">
+    <div>
+      <div class="sec-lbl">달력</div>
+      <div class="mcal">
+        <div class="mcal-hdr">
+          <span class="mcal-mo" id="mcalMo">2026년 5월</span>
+          <div class="mcal-nav">
+            <button onclick="chMo(-1)">&#8249;</button>
+            <button onclick="chMo(1)">&#8250;</button>
+          </div>
+        </div>
+        <div class="mcal-grid" id="mcalGrid"></div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-lbl">최근 예약 내역</div>
+      <div class="rec-list">
+        <div class="rec-item"><div class="rec-dot" style="background:var(--grn)"></div><div class="rec-info"><div class="rec-name">집닥 면접(BE)</div><div class="rec-meta">B1.Room1 · 04.06 11:00~12:00</div></div><span class="rec-cr">6,000 C</span></div>
+        <div class="rec-item"><div class="rec-dot" style="background:var(--grn)"></div><div class="rec-info"><div class="rec-name">충북도립대 실무 논의</div><div class="rec-meta">B1.Room1 · 04.07 10:00~11:30</div></div><span class="rec-cr">9,000 C</span></div>
+        <div class="rec-item"><div class="rec-dot" style="background:var(--acc)"></div><div class="rec-info"><div class="rec-name">K-DeepTech 주간 미팅</div><div class="rec-meta">3F.Room1 · 04.09 14:00~15:30</div></div><span class="rec-cr">3,000 C</span></div>
+        <div class="rec-item"><div class="rec-dot" style="background:var(--red)"></div><div class="rec-info"><div class="rec-name">공간솔루션 주간</div><div class="rec-meta">B1.Room2 · 04.06 09:30 (예약실패)</div></div><span class="rec-cr" style="color:var(--txt3)">—</span></div>
+        <div class="rec-item"><div class="rec-dot" style="background:var(--txt3)"></div><div class="rec-info"><div class="rec-name">집닥 면접(이승규님)</div><div class="rec-meta">7F.Room1 · 04.06 13:00~14:00 (취소)</div></div><span class="rec-cr" style="color:var(--txt3)">환원됨</span></div>
+        <div class="rec-item"><div class="rec-dot" style="background:var(--grn)"></div><div class="rec-info"><div class="rec-name">투자사 미팅 준비</div><div class="rec-meta">3F.Room1 · 04.08 15:00~16:00</div></div><span class="rec-cr">2,000 C</span></div>
+      </div>
+    </div>
+  </aside>
+  <main class="cal">
+    <div class="cal-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="nav-wk">
+          <button class="nbtn" onclick="chWk(-1)">&#8249;</button>
+          <button class="tbtn" onclick="goToday()">오늘</button>
+          <button class="nbtn" onclick="chWk(1)">&#8250;</button>
+        </div>
+        <div class="cal-title" id="calRange">5월 11일 — 17일</div>
+      </div>
+      <div class="cal-ctrl">
+        <div class="legend">
+          <div class="lgd"><span style="background:var(--grn-bg);border-left:3px solid var(--grn)"></span>완료</div>
+          <div class="lgd"><span style="background:#EEF3FF;border-left:3px solid var(--acc)"></span>대기</div>
+          <div class="lgd"><span style="background:var(--red-bg);border-left:3px solid var(--red)"></span>취소</div>
+        </div>
+        <div class="vtog">
+          <button class="vbtn act" onclick="setV(this)">주간</button>
+          <button class="vbtn" onclick="setV(this)">일간</button>
+          <button class="vbtn" onclick="setV(this)">월간</button>
+        </div>
+      </div>
+    </div>
+    <div class="wkview">
+      <div class="tcol" id="tcol"></div>
+      <div class="dcols" id="dcols"></div>
+    </div>
+  </main>
+  <aside class="right">
+    <div class="sp-sect">
+      <div class="sec-lbl" style="margin-bottom:8px">공간 선택</div>
+      <div class="sp-tabs">
+        <div class="sp-tab act" onclick="selSp('3F.Room1',this)"><span class="dot" style="background:#2B60F8"></span>3F.Room1</div>
+        <div class="sp-tab" onclick="selSp('7F.Room1',this)"><span class="dot" style="background:#7B5EA7"></span>7F.Room1</div>
+        <div class="sp-tab" onclick="selSp('B1.Room1',this)"><span class="dot" style="background:#C47B00"></span>B1.Room1</div>
+        <div class="sp-tab" onclick="selSp('B1.Room2',this)"><span class="dot" style="background:#1A9E64"></span>B1.Room2</div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-top">
+          <div><div class="sp-card-name" id="sdName">3F.Room1</div><div class="sp-card-loc" id="sdLoc">지상 3층 · 회의실 · 최대 8인</div></div>
+          <span class="pill pg" id="sdPill">예약 가능</span>
+        </div>
+        <div class="sp-meta">
+          <div class="mc"><div class="mc-val" id="sdRate">100</div><div class="mc-key">C / 30분</div></div>
+          <div class="mc"><div class="mc-val" id="sdMin">30</div><div class="mc-key">분 최소</div></div>
+          <div class="mc"><div class="mc-val" id="sdAv">8</div><div class="mc-key">슬롯 남음</div></div>
+        </div>
+        <div class="sp-tags" id="sdTags"><span class="stag">승인 불필요</span><span class="stag">최대 8인</span><span class="stag">Wi-Fi</span><span class="stag">빔프로젝터</span></div>
+        <div class="avbar"><div class="avfill" id="sdBar" style="width:80%;background:linear-gradient(90deg,var(--grn),rgba(26,158,100,.3))"></div></div>
+      </div>
+    </div>
+    <div class="cr-block">
+      <div class="cr-block-hdr"><span class="cr-block-title">2026년 5월 크레딧</span><span class="cr-refresh">&#8635; 갱신</span></div>
+      <div class="cr-row"><div class="cr-num">23,500</div><div class="cr-sub">/ 38,000 잔여</div></div>
+      <div class="cr-bar"><div class="cr-bar-fill"></div></div>
+      <div class="cr-stats">
+        <div class="cstat"><div class="cstat-val">14,500</div><div class="cstat-key">사용 (확정)</div></div>
+        <div class="cstat"><div class="cstat-val" style="color:var(--amb)">2,000</div><div class="cstat-key">예정 (점유)</div></div>
+        <div class="cstat"><div class="cstat-val" style="color:var(--grn)">23,500</div><div class="cstat-key">잔여</div></div>
+      </div>
+    </div>
+    <div class="bform">
+      <div class="sec-lbl">예약 정보 입력</div>
+      <div class="frow"><label class="flbl">예약명</label><input class="ninput" type="text" placeholder="예: 팀 주간 회의" id="bkName"></div>
+      <div class="frow">
+        <label class="flbl">시간 선택</label>
+        <div class="tgrid">
+          <select class="tsel" id="stSel" onchange="updPrev()">
+            <option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option>
+            <option>11:00</option><option>11:30</option><option selected>13:00</option><option>13:30</option>
+            <option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option>
+            <option>16:00</option><option>16:30</option><option>17:00</option><option>17:30</option>
+          </select>
+          <select class="tsel" id="enSel" onchange="updPrev()">
+            <option>09:30</option><option>10:00</option><option>10:30</option><option>11:00</option>
+            <option>11:30</option><option>12:00</option><option>13:30</option><option selected>14:00</option>
+            <option>14:30</option><option>15:00</option><option>15:30</option><option>16:00</option>
+            <option>16:30</option><option>17:00</option><option>18:00</option>
+          </select>
+        </div>
+      </div>
+      <div class="cprev">
+        <div class="cprow"><span class="cpl">선택 공간</span><span class="cpv" id="cpSp">3F.Room1</span></div>
+        <div class="cprow"><span class="cpl">이용 시간</span><span class="cpv" id="cpDur">60분 (2슬롯)</span></div>
+        <div class="cprow"><span class="cpl">단가</span><span class="cpv" id="cpRt">100 C / 30분</span></div>
+        <hr class="hdiv">
+        <div class="cprow"><span class="cpl" style="font-weight:700;color:var(--txt2)">차감 크레딧</span><span class="cpv hi" id="cpTot">200 크레딧</span></div>
+        <div class="cprow"><span class="cpl">예약 후 잔여</span><span class="cpv gr" id="cpRem">23,300 크레딧</span></div>
+      </div>
+      <button class="sbtn" id="sbtn" onclick="openM()">예약 확정하기</button>
+    </div>
+  </aside>
+</div>
+<div class="moverlay" id="mov" onclick="closeMOut(event)">
+  <div class="modal">
+    <div class="mhdr"><div class="mtitle">예약 확인</div><button class="mclose" onclick="closeM()">&#10005;</button></div>
+    <div class="mbody">
+      <div class="migrid">
+        <div class="micard"><div class="milbl">공간</div><div class="mival" id="mSp">—</div></div>
+        <div class="micard"><div class="milbl">날짜</div><div class="mival">5월 11일 (월)</div></div>
+        <div class="micard"><div class="milbl">시작</div><div class="mival" id="mSt">—</div></div>
+        <div class="micard"><div class="milbl">종료</div><div class="mival" id="mEn">—</div></div>
+      </div>
+      <div class="mcrsum">
+        <div class="mcrow"><span style="color:var(--txt3)">예약명</span><span style="color:var(--txt);font-weight:600" id="mNm">—</span></div>
+        <div class="mcrow"><span style="color:var(--txt3)">이용 시간</span><span style="color:var(--txt)" id="mDur">—</span></div>
+        <div class="mcrow"><span style="color:var(--txt3)">크레딧 차감</span><span class="mctotal" id="mCr">—</span></div>
+        <div style="border-top:1px solid var(--gold-bd);margin:6px 0"></div>
+        <div class="mcrow"><span style="color:var(--txt3)">예약 후 잔여</span><span style="color:var(--grn);font-weight:700" id="mRem">—</span></div>
+      </div>
+      <div class="anotice" id="anotice" style="display:none">&#9888; 이 공간은 관리자 승인이 필요합니다. 승인 완료 후 예약이 확정되며, 크레딧은 확정 시점에 차감됩니다.</div>
+      <div class="mactions">
+        <button class="mcnl" onclick="closeM()">취소</button>
+        <button class="mcfm" onclick="confirmBk()">예약 확정</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"><span>&#10003;</span><span id="toastMsg"></span></div>
+<script>
+var SPACES={
+  '3F.Room1':{rate:100,min:30,appr:false,color:'#2B60F8',loc:'지상 3층 · 회의실 · 최대 8인',av:8,pct:80,pill:'예약 가능',pcls:'pg',tags:['승인 불필요','최대 8인','Wi-Fi','빔프로젝터']},
+  '7F.Room1':{rate:150,min:30,appr:false,color:'#7B5EA7',loc:'지상 7층 · 회의실 · 최대 6인',av:5,pct:60,pill:'예약 가능',pcls:'pg',tags:['승인 불필요','최대 6인','Wi-Fi','화이트보드']},
+  'B1.Room1':{rate:200,min:60,appr:true,color:'#C47B00',loc:'지하 1층 · 대형 회의실 · 최대 20인',av:3,pct:30,pill:'잔여 3슬롯',pcls:'pa',tags:['관리자 승인','최대 20인','음향시스템','스크린']},
+  'B1.Room2':{rate:250,min:60,appr:true,color:'#1A9E64',loc:'지하 1층 · 프리미엄 · 최대 16인',av:0,pct:5,pill:'오늘 마감',pcls:'pr',tags:['관리자 승인','최대 16인','TV 75인치','음향']}
+};
+var BKS=[
+  {day:0,sh:11,sm:0,eh:12,em:0,nm:'집닥 면접(BE)',sp:'B1.Room1',st:'completed',cr:6000},
+  {day:1,sh:10,sm:0,eh:11,em:30,nm:'충북도립대 실무 논의',sp:'B1.Room1',st:'completed',cr:9000},
+  {day:0,sh:13,sm:0,eh:14,em:0,nm:'집닥 면접(이승규님)',sp:'7F.Room1',st:'cancelled',cr:0},
+  {day:2,sh:13,sm:0,eh:14,em:0,nm:'집닥 면접(정인호님)',sp:'7F.Room1',st:'pending',cr:3000},
+  {day:3,sh:14,sm:0,eh:15,em:30,nm:'K-DeepTech 주간 미팅',sp:'3F.Room1',st:'pending',cr:3000},
+  {day:1,sh:15,sm:0,eh:16,em:0,nm:'투자사 미팅 준비',sp:'3F.Room1',st:'completed',cr:2000}
+];
+var DNS=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+var selSpc='3F.Room1',wkOff=0,credits=23500,mmo={y:2026,m:4};
+function selSp(n,el){document.querySelectorAll('.sp-tab').forEach(function(t){t.classList.remove('act');});el.classList.add('act');selSpc=n;rdSpCard();updPrev();}
+function rdSpCard(){var s=SPACES[selSpc];document.getElementById('sdName').textContent=selSpc;document.getElementById('sdLoc').textContent=s.loc;document.getElementById('sdRate').textContent=s.rate;document.getElementById('sdMin').textContent=s.min;document.getElementById('sdAv').textContent=s.av;var p=document.getElementById('sdPill');p.textContent=s.pill;p.className='pill '+s.pcls;var b=document.getElementById('sdBar');b.style.width=s.pct+'%';b.style.background=s.pct<=10?'linear-gradient(90deg,var(--red),rgba(214,59,59,.25))':s.pct<=35?'linear-gradient(90deg,var(--amb),rgba(196,123,0,.25))':'linear-gradient(90deg,var(--grn),rgba(26,158,100,.3))';var tg=document.getElementById('sdTags');tg.innerHTML=s.tags.map(function(t){return t.indexOf('승인')>=0?'<span class="atag">&#9201; '+t+'</span>':'<span class="stag">'+t+'</span>';}).join('');}
+function gwks(d){var r=new Date(d),dw=r.getDay();r.setDate(r.getDate()+(dw===0?-6:1-dw));return r;}
+function rdWk(){var base=new Date(2026,4,11),ws=gwks(base);ws.setDate(ws.getDate()+wkOff*7);var we=new Date(ws);we.setDate(we.getDate()+6);document.getElementById('calRange').textContent=(ws.getMonth()+1)+'월 '+ws.getDate()+'일 — '+we.getDate()+'일';var tc=document.getElementById('tcol');tc.innerHTML='';for(var h=9;h<=20;h++){var d=document.createElement('div');d.className='tslot';d.textContent=(h<10?'0':'')+h+':00';tc.appendChild(d);}var dc=document.getElementById('dcols');dc.innerHTML='';var today=new Date();for(var d=0;d<7;d++){var dd=new Date(ws);dd.setDate(dd.getDate()+d);var isT=dd.toDateString()===today.toDateString();var col=document.createElement('div');col.className='dcol';var hdr=document.createElement('div');hdr.className='dhdr'+(isT?' today':'');hdr.innerHTML='<div class="dname">'+DNS[d]+'</div><div class="dnum">'+dd.getDate()+'</div>';col.appendChild(hdr);var slots=document.createElement('div');slots.className='dslots';if(isT){var now=new Date();var tl=document.createElement('div');tl.className='tnow';tl.style.top=((now.getHours()-9)+now.getMinutes()/60)*72+'px';slots.appendChild(tl);}for(var h=9;h<=20;h++){var rw=document.createElement('div');rw.className='hrow';rw.innerHTML='<div class="hline"></div>';slots.appendChild(rw);}BKS.filter(function(b){return b.day===d;}).forEach(function(b){var top=((b.sh-9)+b.sm/60)*72,dur=(b.eh-b.sh)+(b.em-b.sm)/60,ev=document.createElement('div');ev.className='ev '+b.st;ev.style.top=top+'px';ev.style.height=(dur*72-4)+'px';var c=SPACES[b.sp]?SPACES[b.sp].color:'#9298AE',sh=(b.sh<10?'0':'')+b.sh+':'+(b.sm<10?'0':'')+b.sm,eh=(b.eh<10?'0':'')+b.eh+':'+(b.em<10?'0':'')+b.em;ev.innerHTML='<div class="ev-nm"><span style="width:5px;height:5px;border-radius:50%;background:'+c+';flex-shrink:0;display:inline-block"></span>'+b.nm+'</div><div class="ev-sb">'+b.sp+' · '+sh+'~'+eh+'</div>'+(b.st!=='cancelled'&&b.cr>0?'<div class="ev-cr">'+b.cr.toLocaleString()+' C</div>':'');slots.appendChild(ev);});col.appendChild(slots);dc.appendChild(col);}rdMcal();}
+function rdMcal(){var mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];document.getElementById('mcalMo').textContent=mmo.y+'년 '+mN[mmo.m];var g=document.getElementById('mcalGrid');g.innerHTML='';['월','화','수','목','금','토','일'].forEach(function(x){var e=document.createElement('div');e.className='mcal-dlbl';e.textContent=x;g.appendChild(e);});var fd=new Date(mmo.y,mmo.m,1),sd=fd.getDay();sd=sd===0?6:sd-1;var dim=new Date(mmo.y,mmo.m+1,0).getDate(),today=new Date();for(var i=0;i<sd;i++){var e=document.createElement('div');e.className='mcal-d other';e.textContent=new Date(mmo.y,mmo.m,0).getDate()-sd+i+1;g.appendChild(e);}var hb=[6,7,8,11,14,15,18];for(var d=1;d<=dim;d++){var e=document.createElement('div');e.className='mcal-d';e.textContent=d;if(d===today.getDate()&&mmo.m===today.getMonth()&&mmo.y===today.getFullYear())e.classList.add('today');if(d===11)e.classList.add('sel');if(hb.indexOf(d)>=0)e.classList.add('dot');(function(el){el.onclick=function(){document.querySelectorAll('.mcal-d').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');};})(e);g.appendChild(e);}}
+function chMo(d){mmo.m+=d;if(mmo.m>11){mmo.m=0;mmo.y++;}if(mmo.m<0){mmo.m=11;mmo.y--;}rdMcal();}
+function chWk(d){wkOff+=d;rdWk();}
+function goToday(){wkOff=0;rdWk();}
+function setV(btn){document.querySelectorAll('.vbtn').forEach(function(b){b.classList.remove('act');});btn.classList.add('act');}
+function t2m(s){var p=s.split(':');return parseInt(p[0])*60+parseInt(p[1]);}
+function updPrev(){var s=document.getElementById('stSel').value,e=document.getElementById('enSel').value,dm=t2m(e)-t2m(s),sp=SPACES[selSpc];if(dm<=0){document.getElementById('sbtn').disabled=true;document.getElementById('sbtn').textContent='올바른 시간을 선택하세요';return;}var slots=dm/30,tot=slots*sp.rate,rem=credits-tot;document.getElementById('cpSp').textContent=selSpc;document.getElementById('cpDur').textContent=dm+'분 ('+slots+'슬롯)';document.getElementById('cpRt').textContent=sp.rate.toLocaleString()+' C / 30분';document.getElementById('cpTot').textContent=tot.toLocaleString()+' 크레딧';document.getElementById('cpRem').textContent=rem.toLocaleString()+' 크레딧';document.getElementById('cpRem').className='cpv '+(rem<0?'rd':'gr');var btn=document.getElementById('sbtn');if(rem<0){btn.textContent='크레딧 부족';btn.disabled=true;}else if(dm<sp.min){btn.textContent='최소 '+sp.min+'분 이상 예약';btn.disabled=true;}else{btn.textContent=sp.appr?'승인 요청 예약':'예약 확정하기';btn.disabled=false;}document.getElementById('mSp').textContent=selSpc;document.getElementById('mSt').textContent=s;document.getElementById('mEn').textContent=e;document.getElementById('mDur').textContent=dm+'분';document.getElementById('mCr').textContent=tot.toLocaleString()+' 크레딧';document.getElementById('mRem').textContent=rem.toLocaleString()+' 크레딧';document.getElementById('anotice').style.display=sp.appr?'block':'none';}
+function openM(){document.getElementById('mNm').textContent=document.getElementById('bkName').value.trim()||'(제목 없음)';document.getElementById('mov').classList.add('open');}
+function closeM(){document.getElementById('mov').classList.remove('open');}
+function closeMOut(e){if(e.target.id==='mov')closeM();}
+function confirmBk(){var s=document.getElementById('stSel').value,en=document.getElementById('enSel').value,dm=t2m(en)-t2m(s),sp=SPACES[selSpc],tot=(dm/30)*sp.rate;credits-=tot;closeM();showToast(sp.appr?selSpc+' 승인 요청 접수 — 관리자 확인 후 확정됩니다':selSpc+' 예약 완료 ('+tot.toLocaleString()+' C 차감)');document.getElementById('bkName').value='';updPrev();}
+function showToast(msg){var t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3500);}
+rdSpCard();updPrev();rdWk();
+</script>
+</body>
+</html>
